@@ -1,0 +1,428 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кибер-Печенье Судьбы</title>
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow-x: hidden; }
+        body { 
+            font-family: 'Segoe UI', -apple-system, Roboto, sans-serif; 
+            background: #060713; display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; color: #fff; position: relative; padding: 20px 0; box-sizing: border-box;
+        }
+
+        .bg-animation { position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; z-index: -1; background: radial-gradient(circle at 50% 50%, #141529 0%, #05060b 100%); overflow: hidden; }
+        .wave { position: absolute; width: 200vw; height: 200vw; top: -150vw; left: -50vw; background: radial-gradient(circle, rgba(0, 123, 255, 0.05) 0%, transparent 60%); border-radius: 40%; animation: drift 25s infinite linear; }
+        .wave:nth-child(2) { animation: drift 35s infinite linear; background: radial-gradient(circle, rgba(168, 50, 255, 0.03) 0%, transparent 60%); }
+        .wave:nth-child(3) { animation: drift 20s infinite linear; background: radial-gradient(circle, rgba(40, 167, 69, 0.03) 0%, transparent 60%); }
+        @keyframes drift { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .top-rating-badge { position: fixed; top: 20px; right: 20px; background: rgba(15, 18, 36, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 18px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(20px); z-index: 999; font-size: 13px; font-weight: 600; transition: all 0.3s ease; }
+        .rating-interactive { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; }
+        .status-container { display: flex; align-items: center; gap: 8px; }
+        .edit-rating-btn { cursor: pointer; color: #007bff; font-size: 14px; }
+        .stars-row { display: flex; gap: 4px; direction: rtl; margin-top: 4px; }
+        .top-star { font-size: 18px; color: #3b3f58; cursor: pointer; user-select: none; }
+        .top-star:hover, .top-star:hover ~ .top-star { color: #ffb300; }
+
+        .container { 
+            background: rgba(15, 18, 36, 0.75); padding: 40px 35px; border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7); width: 380px; text-align: center; backdrop-filter: blur(25px); box-sizing: border-box; z-index: 10;
+        }
+        .container.admin-wide { width: 450px; }
+
+        h2 { font-size: 30px; font-weight: 700; margin: 0 0 10px 0; background: linear-gradient(135deg, #ffffff 30%, #8b94bd 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: #6d7392; font-size: 14px; margin-bottom: 25px; margin-top: 0; line-height: 1.5; }
+
+        input { width: 100%; padding: 15px 20px; margin: 12px 0; background: rgba(5, 6, 15, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; box-sizing: border-box; color: #fff; font-size: 15px; }
+        input:focus { border-color: #007bff; box-shadow: 0 0 15px rgba(0, 123, 255, 0.25); outline: none; }
+
+        .btn-glow { width: 100%; padding: 16px; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border: none; color: white; border-radius: 14px; cursor: pointer; font-size: 16px; font-weight: 600; box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3); margin-top: 15px; box-sizing: border-box; }
+        .btn-glow:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 123, 255, 0.5); }
+        .reg-btn { background: linear-gradient(135deg, #e5b060 0%, #c28e3d 100%); box-shadow: 0 6px 20px rgba(229, 176, 96, 0.25); }
+        .toggle-link { margin-top: 25px; font-size: 14px; color: #007bff; cursor: pointer; display: inline-block; }
+        .hidden { display: none !important; }
+
+        .history-controls { display: flex; gap: 10px; margin-top: 15px; width: 100%; }
+        .btn-secondary, #download-btn { flex: 1; padding: 12px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); color: #b5b9d2; border-radius: 12px; cursor: pointer; text-decoration: none; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+        .btn-secondary:hover, #download-btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+
+        .history-block, .upload-block { margin-top: 15px; background: rgba(5, 6, 15, 0.4); padding: 15px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.05); text-align: left; box-sizing: border-box; }
+        .history-block { max-height: 180px; display: flex; flex-direction: column; }
+        .history-block h3, .upload-block h3 { margin: 0 0 10px 0; font-size: 13px; color: #525875; text-transform: uppercase; letter-spacing: 0.5px; }
+        .history-list { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
+        .history-item { padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.04); font-size: 13px; line-height: 1.4; color: #e1e3ed; }
+        .history-date { font-size: 11px; color: #525875; display: block; margin-bottom: 3px; font-weight: 600; }
+        .history-list::-webkit-scrollbar { width: 4px; }
+        .history-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        .menu-art-preview { font-size: 80px; margin: 15px 0; filter: drop-shadow(0 10px 20px rgba(0,123,255,0.15)); user-select: none; }
+        .cookie-wrapper { margin: 20px 0; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; width: 100%; }
+        .cookie-emoji-art { font-size: 80px; cursor: pointer; user-select: none; transition: transform 0.2s ease; }
+        .cookie-emoji-art:hover:not(.disabled) { transform: scale(1.1); }
+        .cookie-emoji-art.disabled { cursor: not-allowed; opacity: 0.7; }
+
+        .prediction-paper { background: linear-gradient(135deg, #ffffff 0%, #f4f5fa 100%); color: #0b0c16; border-left: 5px solid #ff7b00; border-right: 5px solid #ff7b00; padding: 22px; margin-top: 25px; border-radius: 16px; font-style: italic; font-weight: 600; font-size: 16px; box-shadow: 0 15px 40px rgba(255, 123, 0, 0.2), 0 25px 50px rgba(0,0,0,0.6); width: 100%; box-sizing: border-box; opacity: 0; transform: translateY(40px) scale(0.9); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .prediction-paper.visible { opacity: 1; transform: translateY(0) scale(1); }
+        .timer-text { color: #ff3b30; font-size: 13px; margin: 20px 0 10px 0; font-weight: 700; background: rgba(255,59,48,0.08); padding: 8px 16px; border-radius: 24px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-sizing: border-box; border: 1px solid rgba(255,59,48,0.15); }
+        .btn-logout { background: none; border: none; color: #525875; cursor: pointer; font-size: 14px; margin-top: 15px; text-decoration: underline; }
+        .btn-logout:hover { color: #ff3b30; }
+
+        .stats-grid { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 25px; }
+        .stat-card { flex: 1; background: rgba(5, 6, 15, 0.5); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 14px; text-align: center; }
+        .stat-card .num { font-size: 22px; font-weight: 700; color: #007bff; margin-bottom: 4px; }
+        .stat-card .num.green { color: #28a745; }
+        .stat-card .num.gold { color: #ffb300; }
+        .stat-card .label { font-size: 11px; color: #6d7392; text-transform: uppercase; font-weight: 600; }
+        
+        .admin-table-box { background: rgba(5, 6, 15, 0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; padding: 15px; text-align: left; }
+        .admin-table-box h3 { margin: 0 0 12px 0; font-size: 14px; color: #767b93; text-transform: uppercase; }
+        .ratings-scroll-list { max-height: 150px; overflow-y: auto; padding-right: 5px; }
+        .rating-row-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+        .rating-row-item .user-name { color: #e1e3ed; font-weight: 500; }
+        .rating-row-item .user-stars { color: #ffb300; }
+    </style>
+</head>
+<body>
+<div class="bg-animation">
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+</div>
+
+<!-- Интерактивная плашка отзыва -->
+<div id="top-badge" class="top-rating-badge hidden">
+    <div class="rating-interactive">
+        <div class="status-container">
+            <span id="rating-status-text">Оценка: Не выставлена 🚫</span>
+            <span id="edit-rating-icon" class="edit-rating-btn hidden" onclick="enableReRating()">✎</span>
+        </div>
+        <div id="stars-selector" class="stars-row">
+            <span class="top-star" onclick="sendRating(5)">★</span>
+            <span class="top-star" onclick="sendRating(4)">★</span>
+            <span class="top-star" onclick="sendRating(3)">★</span>
+            <span class="top-star" onclick="sendRating(2)">★</span>
+            <span class="top-star" onclick="sendRating(1)">★</span>
+        </div>
+    </div>
+</div>
+
+<!-- АВТОРИЗАЦИЯ -->
+<div class="container" id="auth-box">
+    <div id="login-form">
+        <h2>Войти в Систему</h2>
+        <p class="subtitle">Узнайте, что приготовило вам будущее</p>
+        <input type="email" id="login-email" placeholder="Ваш Email" value="test@test.com" required>
+        <input type="password" id="login-password" placeholder="Пароль" value="123456" required>
+        <button class="btn-glow" onclick="auth('login')">Авторизоваться</button>
+        <div class="toggle-link" onclick="toggleForms()">Создать новый аккаунт</div>
+    </div>
+
+    <div id="register-form" class="hidden">
+        <h2>Регистрация</h2>
+        <p class="subtitle">Создайте профиль для доступа к предсказаниям</p>
+        <input type="text" id="reg-name" placeholder="Ваше Имя" required>
+        <input type="email" id="reg-email" placeholder="Email" required>
+        <input type="password" id="reg-password" placeholder="Придумайте пароль" required>
+        <button class="btn-glow reg-btn" onclick="auth('register')">Зарегистрироваться</button>
+        <div class="toggle-link" onclick="toggleForms()">Уже есть аккаунт? Войти</div>
+    </div>
+</div>
+
+<!-- ГЛАВНЫЙ КОНТЕЙНЕР ЛИЧНОГО КАБИНЕТА -->
+<div class="container hidden" id="profile">
+    
+    <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ ОБЫЧНОГО ПОЛЬЗОВАТЕЛЯ -->
+    <div id="menu-screen" class="hidden">
+        <h2 id="welcome-user">Привет, Путник!</h2>
+        <p class="subtitle">Готовы узнать свое новое пророчество?</p>
+        
+        <div class="menu-art-preview">🥠</div>
+        
+        <button class="btn-glow" id="start-break-btn" onclick="showBreakScreen()">Сломать печенье</button>
+        
+        <div id="menu-timer" class="timer-text hidden">⏳ СЛЕДУЮЩЕЕ ПЕЧЕНЬЕ ЧЕРЕЗ: <span id="menu-countdown">15</span> СЕК</div>
+
+        <div class="history-controls">
+            <button class="btn-secondary" onclick="toggleHistoryBlock()">📜 История</button>
+            <button class="btn-secondary" onclick="toggleUploadBlock()">✍️ Добавить</button>
+        </div>
+        
+        <div class="history-controls">
+            <a href="/export-history" class="btn-secondary" id="download-btn" style="width:100%;">💾 Скачать историю .TXT</a>
+        </div>
+
+        <div id="upload-block" class="upload-block hidden">
+            <h3>Загрузить предсказание:</h3>
+            <input type="text" id="custom-pred-text" placeholder="Введите text пророчества..." style="margin-top:0;">
+            <button class="btn-glow reg-btn" onclick="uploadCustomPrediction()" style="padding:10px; margin-top:5px; font-size:14px;">Добавить в пул</button>
+        </div>
+
+        <div id="history-block" class="history-block hidden">
+            <h3>Ваши предсказания:</h3>
+            <div id="history-list" class="history-list"></div>
+        </div>
+        
+        <button class="btn-logout" onclick="logout()">Выйти из аккаунта</button>
+    </div>
+    <!-- ЭКРАН 2: ЭКРАН РАЗЛОМА ПЕЧЕНЬЯ -->
+    <div id="break-screen" class="hidden">
+        <h2>Печенье Судьбы</h2>
+        <p class="subtitle" id="break-instruction">Нажмите на печенье, чтобы расколоть его</p>
+        
+        <div class="cookie-wrapper">
+            <div id="cookie" class="cookie-emoji-art" onclick="breakCookie()">🥠</div>
+            <div id="prediction" class="prediction-paper"></div>
+        </div>
+
+        <button class="btn-glow reg-btn hidden" id="back-to-menu-btn" onclick="backToMenu()">Вернуться в главное меню</button>
+    </div>
+
+    <!-- ЭКРАН 3: СЕКРЕТНАЯ ПАНЕЛЬ АДМИНИСТРАТОРА -->
+    <div id="admin-screen" class="hidden">
+        <h2>Аналитика Системы</h2>
+        <p class="subtitle">Панель управления и статистика приложения</p>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="num" id="stat-users">0</div>
+                <div class="label">Юзеров</div>
+            </div>
+            <div class="stat-card">
+                <div class="num green" id="stat-cookies">0</div>
+                <div class="label">Разломов</div>
+            </div>
+            <div class="stat-card">
+                <div class="num gold" id="stat-avg-rating">0.0</div>
+                <div class="label">Рейтинг</div>
+            </div>
+        </div>
+
+        <div class="admin-table-box">
+            <h3>Отзывы пользователей:</h3>
+            <div class="ratings-scroll-list" id="admin-ratings-list"></div>
+        </div>
+
+        <button class="btn-logout" onclick="logout()" style="margin-top: 25px;">Выйти из панели</button>
+    </div>
+
+</div>
+
+<script>
+    let timerInterval = null;
+    let isCooldownActive = false;
+
+    function toggleForms() {
+        document.getElementById('login-form').classList.toggle('hidden');
+        document.getElementById('register-form').classList.toggle('hidden');
+    }
+
+    function showBreakScreen() {
+        if (isCooldownActive) return;
+        document.getElementById('menu-screen').classList.add('hidden');
+        document.getElementById('break-screen').classList.remove('hidden');
+        resetCookieUI();
+    }
+
+    function backToMenu() {
+        document.getElementById('break-screen').classList.add('hidden');
+        document.getElementById('menu-screen').classList.remove('hidden');
+        document.getElementById('history-block').classList.add('hidden');
+        document.getElementById('upload-block').classList.add('hidden');
+    }
+
+    function toggleUploadBlock() {
+        document.getElementById('history-block').classList.add('hidden');
+        document.getElementById('upload-block').classList.toggle('hidden');
+    }
+
+    async function toggleHistoryBlock() {
+        document.getElementById('upload-block').classList.add('hidden');
+        const block = document.getElementById('history-block');
+        block.classList.toggle('hidden');
+        
+        if (!block.classList.contains('hidden')) {
+            const response = await fetch('/get-history');
+            if (response.ok) {
+                const data = await response.json();
+                const listEl = document.getElementById('history-list');
+                listEl.innerHTML = '';
+                if (data.length === 0) {
+                    listEl.innerHTML = '<div class="history-item" style="text-align:center;color:#525875;">История пока пуста</div>';
+                } else {
+                    data.forEach(item => {
+                        listEl.innerHTML += `<div class="history-item"><span class="history-date">${item.created_at}</span>${item.prediction}</div>`;
+                    });
+                }
+            }
+        }
+    }
+
+    function updateRatingUI(hasRated, starsCount) {
+        const textEl = document.getElementById('rating-status-text');
+        const selectorEl = document.getElementById('stars-selector');
+        const editIcon = document.getElementById('edit-rating-icon');
+        if (hasRated) {
+            let starsRow = '⭐'.repeat(starsCount);
+            textEl.innerHTML = `Моя оценка: ${starsRow}`;
+            selectorEl.classList.add('hidden'); editIcon.classList.remove('hidden');
+        } else {
+            textEl.innerHTML = 'Оцените наше приложение:';
+            selectorEl.classList.remove('hidden'); editIcon.classList.add('hidden');
+        }
+    }
+
+    function enableReRating() { updateRatingUI(false, 0); }
+    async function sendRating(starsCount) {
+        const response = await fetch('/send-rating', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ stars: starsCount })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert(data.message);
+            updateRatingUI(true, starsCount);
+        } else { alert(data.error); }
+    }
+
+    async function loadAdminDashboard() {
+        const response = await fetch('/get-admin-stats');
+        if (response.ok) {
+            const stats = await response.json();
+            document.getElementById('stat-users').innerText = stats.total_users;
+            document.getElementById('stat-cookies').innerText = stats.total_cookies;
+            document.getElementById('stat-avg-rating').innerText = stats.avg_rating;
+            
+            const listEl = document.getElementById('admin-ratings-list');
+            listEl.innerHTML = '';
+            if (stats.ratings.length === 0) {
+                listEl.innerHTML = '<div style="color:#525875;text-align:center;font-size:13px;padding:10px;">Оценок еще нет</div>';
+            } else {
+                stats.ratings.forEach(item => {
+                    let starsRow = '⭐'.repeat(item.stars);
+                    listEl.innerHTML += `
+                        <div class="rating-row-item">
+                            <span class="user-name">${item.name}</span>
+                            <span class="user-stars">${starsRow}</span>
+                        </div>
+                    `;
+                });
+            }
+        }
+    }
+
+    async function uploadCustomPrediction() {
+        const inputEl = document.getElementById('custom-pred-text');
+        const text = inputEl.value.trim();
+        if (!text) return alert('Введите текст предсказания!');
+        const response = await fetch('/add-prediction', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: text })
+        });
+        const data = await response.json();
+        if (response.ok) { alert(data.message); inputEl.value = ''; document.getElementById('upload-block').classList.add('hidden'); }
+    }
+
+    async function auth(action) {
+        const email = document.getElementById(action === 'login' ? 'login-email' : 'reg-email').value;
+        const password = document.getElementById(action === 'login' ? 'login-password' : 'reg-password').value;
+        const name = action === 'register' ? document.getElementById('reg-name').value : null;
+
+        if (!email || !password) return alert('Заполните поля!');
+
+        const response = await fetch(`/${action}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            if (action === 'login') {
+                const mainContainer = document.getElementById('profile');
+                document.getElementById('auth-box').classList.add('hidden');
+                mainContainer.classList.remove('hidden');
+                
+                if (data.role === 'admin') {
+                    mainContainer.classList.add('admin-wide');
+                    document.getElementById('admin-screen').classList.remove('hidden');
+                    document.getElementById('menu-screen').classList.add('hidden');
+                    document.getElementById('break-screen').classList.add('hidden');
+                    document.getElementById('top-badge').classList.add('hidden');
+                    loadAdminDashboard();
+                } else {
+                    mainContainer.classList.remove('admin-wide');
+                    document.getElementById('menu-screen').classList.remove('hidden');
+                    document.getElementById('admin-screen').classList.add('hidden');
+                    document.getElementById('break-screen').classList.add('hidden');
+                    
+                    document.getElementById('top-badge').classList.remove('hidden');
+                    if (data.has_rated) {
+                        document.getElementById('rating-status-text').innerHTML = 'Приложение оценено! ❤️';
+                        document.getElementById('stars-selector').classList.add('hidden');
+                        document.getElementById('edit-rating-icon').classList.remove('hidden');
+                    } else {
+                        updateRatingUI(false, 0);
+                    }
+                    
+                    isCooldownActive = false;
+                    document.getElementById('start-break-btn').disabled = false;
+                    document.getElementById('menu-timer').classList.add('hidden');
+                }
+            } else {
+                alert(data.message);
+                toggleForms();
+            }
+        } else { alert(data.error); }
+    }
+
+    async function breakCookie() {
+        const cookieEl = document.getElementById('cookie');
+        if (cookieEl.classList.contains('disabled')) return;
+        const response = await fetch('/break-cookie', { method: 'POST' });
+        const data = await response.json();
+        if (response.ok) {
+            cookieEl.innerText = '🥠✨'; cookieEl.classList.add('disabled');
+            document.getElementById('break-instruction').innerText = "Пророчество открыто";
+            setTimeout(() => {
+                cookieEl.innerText = '📂';
+                const predEl = document.getElementById('prediction');
+                predEl.innerText = data.prediction;
+                predEl.classList.add('visible');
+                document.getElementById('back-to-menu-btn').classList.remove('hidden');
+            }, 250);
+            startCooldown(15);
+        } else { alert(data.error); if (data.time_left) startCooldown(Math.ceil(data.time_left)); }
+    }
+
+    function startCooldown(seconds) {
+        isCooldownActive = true; document.getElementById('start-break-btn').disabled = true;
+        const menuTimerEl = document.getElementById('menu-timer');
+        const countdownEl = document.getElementById('menu-countdown');
+        menuTimerEl.classList.remove('hidden');
+        let timeLeft = seconds; countdownEl.innerText = timeLeft;
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--; countdownEl.innerText = timeLeft;
+            if (timeLeft <= 0) { clearInterval(timerInterval); isCooldownActive = false; document.getElementById('start-break-btn').disabled = false; menuTimerEl.classList.add('hidden'); }
+        }, 1000);
+    }
+
+    function resetCookieUI() {
+        const cookieEl = document.getElementById('cookie'); cookieEl.innerText = '🥠'; cookieEl.classList.remove('disabled');
+        const predEl = document.getElementById('prediction'); predEl.classList.remove('visible');
+        document.getElementById('back-to-menu-btn').classList.add('hidden');
+        document.getElementById('break-instruction').innerText = "Нажмите на печенье, чтобы расколоть его";
+    }
+
+    async function logout() {
+        await fetch('/logout', { method: 'POST' });
+        clearInterval(timerInterval);
+        window.location.reload();
+    }
+</script>
+</body>
+</html>
